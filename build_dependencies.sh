@@ -13,20 +13,32 @@ SOURCE_DIR="$PWD/cxx/thirdparts"
 INSTALL_DIR="$SOURCE_DIR/local"
 
 build_rdkafka() {
-    cd "$SOURCE_DIR/librdkafka"
+    pushd "$SOURCE_DIR"
+    if [[ ! -f v2.3.0.tar.gz ]]; then
+        wget https://github.com/confluentinc/librdkafka/archive/refs/tags/v2.3.0.tar.gz	    
+    fi
+    tar zxf v2.3.0.tar.gz
+    pushd librdkafka-2.3.0
     ./configure --prefix="$INSTALL_DIR"
     make
     make install
-    cd -
+    popd
+    popd
 }
 
 build_log4cplus() {
-    cd "$SOURCE_DIR/log4cplus"
+    pushd "$SOURCE_DIR"	
+    if [[ ! -f log4cplus-1.2.2.tar.gz ]]; then
+        wget https://github.com/log4cplus/log4cplus/releases/download/REL_1_2_2/log4cplus-1.2.2.tar.gz	    
+    fi	    
+    tar zxf log4cplus-1.2.2.tar.gz
+    pushd log4cplus-1.2.2
     ./scripts/fix-timestamps.sh
     CXXFLAGS="-D_GLIBCXX_USE_CXX11_ABI=0" ./configure --prefix="$INSTALL_DIR" --enable-static --with-pic
     make
     make install
-    cd -
+    popd
+    popd
 }
 
 build_boost_1_70() {
@@ -57,8 +69,15 @@ build_protobuf_2_6() {
 }
 
 build_pulsar() {
+    pushd "$SOURCE_DIR"	
+    if [[ ! -f v2.6.3.tar.gz ]]; then
+        wget https://github.com/apache/pulsar/archive/refs/tags/v2.6.3.tar.gz	     
+    fi
+    tar zxf v2.6.3.tar.gz
+    popd
+
     PROTOC_PATH="$INSTALL_DIR/bin/protoc"
-    PULSAR_CPP_DIR="$SOURCE_DIR/pulsar/pulsar-client-cpp"
+    PULSAR_CPP_DIR="$SOURCE_DIR/pulsar-2.6.3/pulsar-client-cpp"
 
     # Use our own CMakeLists.txt to compile libpulsar.a only
     cp ./pulsar-client-cpp/CMakeLists.txt "$PULSAR_CPP_DIR"
@@ -75,9 +94,9 @@ build_pulsar() {
     # Here we use multiple threads to compile because it take long to compile with a single thread
     make -j4
     make install
-    pushd $PULSAR_CPP_DIR
-    git checkout -- .
-    popd
+    # pushd $PULSAR_CPP_DIR
+    # git checkout -- .
+    # popd
     popd
     popd
 }

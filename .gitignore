@@ -32,3 +32,5 @@ version.cc
 .idea
 .vscode
 .DS_Store
+
+cxx/thirdparts/
