@@ -111,6 +111,8 @@ include_directories(
   ${LOG4CXX_INCLUDE_PATH}
   ${GTEST_INCLUDE_PATH}
   ${GMOCK_INCLUDE_PATH}
+  /opt/homebrew/Cellar/snappy/1.1.10/include
+  /opt/homebrew/Cellar/zstd/1.5.5/include
 )
 
 set(COMMON_LIBS

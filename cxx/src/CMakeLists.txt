@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD 11)
 
 if (NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
-endif()
+endif ()
 
 set(CMAKE_INSTALL_PREFIX "${PROJECT_SOURCE_DIR}/..")
 string(CONCAT CMAKE_CXX_FLAGS "-D_GLIBCXX_USE_CXX11_ABI=0 " ${CMAKE_CXX_FLAGS})
@@ -20,9 +20,9 @@ endif ()
 message(STATUS "CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
 
 set(CMAKE_PREFIX_PATH
-    ${CMAKE_PREFIX_PATH}
-    ${PROJECT_SOURCE_DIR}/../thirdparts/local
-    )
+        ${CMAKE_PREFIX_PATH}
+        ${PROJECT_SOURCE_DIR}/../thirdparts/local
+)
 
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
@@ -81,65 +81,123 @@ if (NOT PULSAR_INCLUDE_PATH OR NOT PULSAR_LIBRARY_PATH)
 endif ()
 
 set(HEADERS
-    qbus_consumer.h
-    qbus_producer.h
-    )
+        qbus_consumer.h
+        qbus_producer.h
+)
 
 set(SOURCES
-    ${SOURCES}
-    kafka/qbus_config.cc
-    kafka/qbus_consumer.cc
-    kafka/qbus_helper.cc
-    kafka/qbus_producer.cc
-    kafka/qbus_producer_imp_map.cc
-    kafka/qbus_rdkafka.cc
-    kafka/qbus_record_msg.cc
-    kafka/qbus_thread.cc
-    kafka/qbus_topic_partition_set.cc
-    kafka/util/logger.cc
-    kafka/util/version.cc
-    pulsar/log4cplus_logger.cc
-    pulsar/property_tree_proxy.cc
-    pulsar/pulsar_config.cc
-    pulsar/qbus_consumer.cc
-    pulsar/qbus_consumer_config.cc
-    pulsar/qbus_php_consumer.cc
-    pulsar/qbus_php_producer.cc
-    pulsar/qbus_producer.cc
-    pulsar/qbus_producer_config.cc
-    pulsar/qbus_producer_map.cc
-    pulsar/retryable_send_callback.cc
-    pulsar/timer.cc
-    qbus_consumer.cc
-    qbus_producer.cc
-    )
+        kafka/qbus_config.cc
+        kafka/qbus_consumer.cc
+        kafka/qbus_helper.cc
+        kafka/qbus_producer.cc
+        kafka/qbus_producer_imp_map.cc
+        kafka/qbus_rdkafka.cc
+        kafka/qbus_record_msg.cc
+        kafka/qbus_thread.cc
+        kafka/qbus_topic_partition_set.cc
+        kafka/util/logger.cc
+        kafka/util/version.cc
+        pulsar/log4cplus_logger.cc
+        pulsar/property_tree_proxy.cc
+        pulsar/pulsar_config.cc
+        pulsar/qbus_consumer.cc
+        pulsar/qbus_consumer_config.cc
+        pulsar/qbus_php_consumer.cc
+        pulsar/qbus_php_producer.cc
+        pulsar/qbus_producer.cc
+        pulsar/qbus_producer_config.cc
+        pulsar/qbus_producer_map.cc
+        pulsar/retryable_send_callback.cc
+        pulsar/timer.cc
+        qbus_consumer.cc
+        qbus_producer.cc
+        ${SOURCES}
+)
+
+set(OPENSSL_ROOT_DIR /opt/homebrew/Cellar/openssl@3/3.2.1/)
+find_package(OpenSSL REQUIRED)
+
+find_library(LZ4_LIBRARY
+        NAMES lz4
+        PATHS /opt/homebrew/Cellar/lz4/1.9.4/lib
+        NO_DEFAULT_PATH)
+
+find_library(ZSTD_LIBRARY
+        NAMES zstd
+        PATHS /opt/homebrew/Cellar/zstd/1.5.5/lib
+        NO_DEFAULT_PATH)
+
+find_library(SNAPPY_LIBRARY
+        NAMES snappy
+        PATHS /opt/homebrew/Cellar/snappy/1.1.10/lib/
+        NO_DEFAULT_PATH)
+
+find_library(SASL_LIBRARY
+        NAMES sasl2
+        PATHS /opt/homebrew/Cellar/cyrus-sasl/2.1.28_2/lib
+        NO_DEFAULT_PATH)
+
+find_library(ZLIB_LIBRAY
+        NAMES z
+        PATHS /opt/homebrew/Cellar/zlib/1.3/lib/
+        NO_DEFAULT_PATH
+)
 
 if (NOT DEFINED LIBNAME)
     set(LIBNAME ${PROJECT_NAME})
 endif ()
+
 add_library(${LIBNAME} SHARED ${SOURCES})
+
+set_target_properties(${LIBNAME} PROPERTIES LINK_FLAGS "-undefined dynamic_lookup")
+
 include_directories(..
-    ${EXTRA_INCLUDE_DIRS}
-    ${LIBRDKAFKA_INCLUDE_DIR}
-    ${LOG4CPLUS_INCLUDE_DIR}
-    ${PULSAR_INCLUDE_PATH}
+        ${EXTRA_INCLUDE_DIRS}
+        ${LIBRDKAFKA_INCLUDE_DIR}
+        ${LOG4CPLUS_INCLUDE_DIR}
+        ${PULSAR_INCLUDE_PATH}
+        ${OPENSSL_INCLUDE_DIR}
+)
+
+if (APPLE)
+    target_link_libraries(${LIBNAME}
+            ${EXTRA_LIBS}
+            ${SASL_LIBRARY}
+            ${LIBRDKAFKA_LIB}
+            ${LOG4CPLUS_LIB}
+            ${LZ4_LIBRARY}
+            ${ZLIB_LIBRAY}
+            ${ZSTD_LIBRARY}
+            ${SNAPPY_LIBRARY}
+            ${OPENSSL_LIBRARIES}
+            # put it before PROTOBUF_LIBS and BOOST_LIBS which are its dependencies
+            ${PULSAR_LIBRARY_PATH}
+            ${PROTOBUF_LIBS}
+            ${BOOST_LIBS}
+            dl
+            pthread
+            #            rt
+            curl
+            -stdlib=libc++
     )
-target_link_libraries(${LIBNAME}
-    ${EXTRA_LIBS}
-    ${LIBRDKAFKA_LIB}
-    ${LOG4CPLUS_LIB}
-    # put it before PROTOBUF_LIBS and BOOST_LIBS which are its dependencies
-    ${PULSAR_LIBRARY_PATH}
-    ${PROTOBUF_LIBS}
-    ${BOOST_LIBS}
-    dl
-    pthread
-    rt
-    z
-    ssl
-    curl
-    -static-libstdc++
+else ()
+    target_link_libraries(${LIBNAME}
+            ${EXTRA_LIBS}
+            ${LIBRDKAFKA_LIB}
+            ${LOG4CPLUS_LIB}
+            # put it before PROTOBUF_LIBS and BOOST_LIBS which are its dependencies
+            ${PULSAR_LIBRARY_PATH}
+            ${PROTOBUF_LIBS}
+            ${BOOST_LIBS}
+            dl
+            pthread
+            rt
+            z
+            ssl
+            curl
+            -static-libstdc++
     )
+endif ()
 
 install(FILES ${HEADERS} DESTINATION include)
 install(TARGETS ${LIBNAME} LIBRARY DESTINATION "lib/${INSTALL_SUBDIR}")

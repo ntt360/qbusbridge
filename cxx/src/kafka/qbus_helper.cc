@@ -7,9 +7,19 @@
 #include <sys/types.h>
 #include <string.h>
 #include <unistd.h>
-#include <sys/syscall.h>
 #include <sys/time.h>
+
+#if __APPLE__
+#include <pthread.h>
+uint64_t gettid() {
+    uint64_t tid;
+    pthread_threadid_np(NULL, &tid);
+    return tid;
+}
+#else
+#include <sys/syscall.h>
 #define gettid() syscall(__NR_gettid)
+#endif
 
 #include <fstream>
 #include <sstream>

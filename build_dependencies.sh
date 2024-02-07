@@ -48,7 +48,7 @@ build_boost_1_70() {
     fi
     tar zxf boost_1_70_0.tar.gz
     pushd boost_1_70_0
-    ./bootstrap.sh --prefix="$INSTALL_DIR" --with-libraries=regex,system
+    ./bootstrap.sh --prefix="$INSTALL_DIR" --with-libraries=regex,system compiler.balcklist clang --with-toolset=clang
     ./b2 cxxflags="-D_GLIBCXX_USE_CXX11_ABI=0 -fPIC" install
     popd
     popd

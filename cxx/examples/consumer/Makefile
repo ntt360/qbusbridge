@@ -9,7 +9,7 @@ all: $(TARGETS)
 	@echo "Build targets: "$(TARGETS)
 
 %: %.cc
-	$(CXX) -o $@ $< $(CXX_FLAGS) -I $(INC_DIR) -L $(LIB_DIR) -lQBus -Wl,-rpath=$(LIB_DIR)
+	$(CXX) -o $@ $< $(CXX_FLAGS) -I $(INC_DIR) -L $(LIB_DIR) -lQBus -Wl,-rpath,$(LIB_DIR)
 
 .Phony:
 clean:
