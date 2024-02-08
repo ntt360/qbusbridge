@@ -28,29 +28,75 @@
 
 ## 编译
 
-确保你的系统上安装了 g++ (>= 4.8.5), boost (>= 1.41)，cmake (>= 3.1)，swig (>= 3.0.12)。
+确保你的系统上安装了 `g++` (>= 4.8.5), `boost` (>= 1.41)，`cmake` (>= 3.1)，`swig` (>= 3.0.12)。
 
 #### git clone
 
 ```shell
-git clone --recursive https://github.com/Qihoo360/qbusbridge.git
+git clone https://github.com/ntt360/qbusbridge.git
 ```
 
+#### CentOS 
 此外，qbus SDK 静态链接到 libstdc++，因此必须确保 `libstdc++.a` 存在。对于 CentOS 用户，运行：
 
 ```bash
 sudo yum install -y glibc-static libstdc++-static
 ```
 
-#### 支持 sacl
+#### MacOS
 
-如果你希望 `librdkafa` 支持 `kafka` `sacl` 鉴权相关功能，那么还需要安装：
+`MacOS` 下的 `c++` 库不是 `libstdc++-static` 需要使用标准的内置 `libc++` 库即可，也没有静态库，`CMakeList.txt` 脚本已经自动处理，不需关心。
+
+另外，`MacOS` 下通常的很多库都是通过 `brew` 安装的，很多库默认不在系统动态库加载配置里，所以如果你发觉编译链接时缺少某个依赖库，那么请检查此库是否已经安装或者是库文件不在系统目录。一般可能存在如下库不存在，那么你需要类似配置如下导出：
+
+```shell
+# openssl
+export LDFLAGS="-L/opt/homebrew/Cellar/openssl@3/${Version}/lib:$LDFLAGS"
+export CPPFLAGS="-I/opt/homebrew/Cellar/openssl@3/${Version}/include:$CPPFLAGS"
+
+#lz4 
+export LDFLAGS="-L/opt/homebrew/Cellar/lz4/${Version}/lib:$LDFLAGS"
+export CPPFLAGS="-I/opt/homebrew/Cellar/lz4/${Version}/include:$CPPFLAGS"
+
+#zstd
+export LDFLAGS="-L/opt/homebrew/Cellar/zstd/${Version}/lib:$LDFLAGS"
+export CPPFLAGS="-I/opt/homebrew/Cellar/zstd/${Version}/include:$CPPFLAGS"
+
+# snappy
+export LDFLAGS="-L/opt/homebrew/Cellar/snappy/${Version}/lib:$LDFLAGS"
+export CPPFLAGS="-I/opt/homebrew/Cellar/snappy/${Version}/include:$CPPFLAGS"
+
+# sasl2
+export LDFLAGS="-L/opt/homebrew/Cellar/sasl2/${Version}/lib:$LDFLAGS"
+export CPPFLAGS="-I/opt/homebrew/Cellar/sasl2/${Version}/include:$CPPFLAGS"
+
+# zlib
+export LDFLAGS="-L/opt/homebrew/Cellar/zlib/${Version}/lib:$LDFLAGS"
+export CPPFLAGS="-I/opt/homebrew/Cellar/zlib/${Version}/include:$CPPFLAGS"
+
+```
+
+如果说这些你都配置过，那么忽略配置即可。
+
+#### 支持 sasl
+
+如果你希望 `librdkafa` 支持 `kafka` `sasl` 鉴权相关功能，那么还需要安装：
 
 ```shell
 sudo yum install -y cyrus-sasl-devel
 
 # 如果你还用到 GSSAPI 认证，那么还需要编译该插件
 sudo yum install -y cyrus-sasl-gssapi
+```
+
+如果是 `MacOS` 可以使用 `brew` 安装：
+
+```shell
+brew install cyrus-sasl
+
+# 配置库文件目录到系统目录
+export LDFLAGS="-L/opt/homebrew/opt/cyrus-sasl/lib:$LDFLAGS"
+export CPPFLAGS="-I/opt/homebrew/opt/cyrus-sasl/include:$CPPFLAGS"
 ```
 
 ### 1. 安装子模块

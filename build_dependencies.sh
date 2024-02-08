@@ -5,10 +5,6 @@ cd `dirname $0`
 VERSION=$(cat VERSION)
 echo "const char* version = \"$VERSION\";" > ./cxx/src/kafka/util/version.cc
 
-# init and download submodules
-git submodule init
-git submodule update
-
 SOURCE_DIR="$PWD/cxx/thirdparts"
 INSTALL_DIR="$SOURCE_DIR/local"
 
@@ -48,9 +44,15 @@ build_boost_1_70() {
     fi
     tar zxf boost_1_70_0.tar.gz
     pushd boost_1_70_0
-    ./bootstrap.sh --prefix="$INSTALL_DIR" --with-libraries=regex,system compiler.balcklist clang --with-toolset=clang
+
+    # MacOS 必须指定 clang 编译器，否则回报编译错误
+    os=$(uname)
+    if [[ $os == "Darwin" ]]; then
+        ./bootstrap.sh --prefix="$INSTALL_DIR" --with-libraries=regex,system --with-toolset=clang
+    else
+        ./bootstrap.sh --prefix="$INSTALL_DIR" --with-libraries=regex,system
+    fi
     ./b2 cxxflags="-D_GLIBCXX_USE_CXX11_ABI=0 -fPIC" install
-    popd
     popd
 }
 
@@ -94,9 +96,6 @@ build_pulsar() {
     # Here we use multiple threads to compile because it take long to compile with a single thread
     make -j4
     make install
-    # pushd $PULSAR_CPP_DIR
-    # git checkout -- .
-    # popd
     popd
     popd
 }

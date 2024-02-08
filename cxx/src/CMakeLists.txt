@@ -86,6 +86,7 @@ set(HEADERS
 )
 
 set(SOURCES
+        ${SOURCES}
         kafka/qbus_config.cc
         kafka/qbus_consumer.cc
         kafka/qbus_helper.cc
@@ -111,36 +112,6 @@ set(SOURCES
         pulsar/timer.cc
         qbus_consumer.cc
         qbus_producer.cc
-        ${SOURCES}
-)
-
-set(OPENSSL_ROOT_DIR /opt/homebrew/Cellar/openssl@3/3.2.1/)
-find_package(OpenSSL REQUIRED)
-
-find_library(LZ4_LIBRARY
-        NAMES lz4
-        PATHS /opt/homebrew/Cellar/lz4/1.9.4/lib
-        NO_DEFAULT_PATH)
-
-find_library(ZSTD_LIBRARY
-        NAMES zstd
-        PATHS /opt/homebrew/Cellar/zstd/1.5.5/lib
-        NO_DEFAULT_PATH)
-
-find_library(SNAPPY_LIBRARY
-        NAMES snappy
-        PATHS /opt/homebrew/Cellar/snappy/1.1.10/lib/
-        NO_DEFAULT_PATH)
-
-find_library(SASL_LIBRARY
-        NAMES sasl2
-        PATHS /opt/homebrew/Cellar/cyrus-sasl/2.1.28_2/lib
-        NO_DEFAULT_PATH)
-
-find_library(ZLIB_LIBRAY
-        NAMES z
-        PATHS /opt/homebrew/Cellar/zlib/1.3/lib/
-        NO_DEFAULT_PATH
 )
 
 if (NOT DEFINED LIBNAME)
@@ -149,7 +120,9 @@ endif ()
 
 add_library(${LIBNAME} SHARED ${SOURCES})
 
-set_target_properties(${LIBNAME} PROPERTIES LINK_FLAGS "-undefined dynamic_lookup")
+if (APPLE)
+    set_target_properties(${LIBNAME} PROPERTIES LINK_FLAGS "-undefined dynamic_lookup")
+endif ()
 
 include_directories(..
         ${EXTRA_INCLUDE_DIRS}
@@ -162,21 +135,20 @@ include_directories(..
 if (APPLE)
     target_link_libraries(${LIBNAME}
             ${EXTRA_LIBS}
-            ${SASL_LIBRARY}
             ${LIBRDKAFKA_LIB}
             ${LOG4CPLUS_LIB}
-            ${LZ4_LIBRARY}
-            ${ZLIB_LIBRAY}
-            ${ZSTD_LIBRARY}
-            ${SNAPPY_LIBRARY}
-            ${OPENSSL_LIBRARIES}
             # put it before PROTOBUF_LIBS and BOOST_LIBS which are its dependencies
             ${PULSAR_LIBRARY_PATH}
             ${PROTOBUF_LIBS}
             ${BOOST_LIBS}
             dl
             pthread
-            #            rt
+            z
+            ssl
+            snappy
+            sasl2
+            zstd
+            lz4
             curl
             -stdlib=libc++
     )
