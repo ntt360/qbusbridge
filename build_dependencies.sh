@@ -11,7 +11,7 @@ INSTALL_DIR="$SOURCE_DIR/local"
 build_rdkafka() {
     pushd "$SOURCE_DIR"
     if [[ ! -f v2.3.0.tar.gz ]]; then
-        wget https://github.com/confluentinc/librdkafka/archive/refs/tags/v2.3.0.tar.gz	    
+        wget --no-check-certificate https://github.com/confluentinc/librdkafka/archive/refs/tags/v2.3.0.tar.gz
     fi
     tar zxf v2.3.0.tar.gz
     pushd librdkafka-2.3.0
@@ -23,10 +23,10 @@ build_rdkafka() {
 }
 
 build_log4cplus() {
-    pushd "$SOURCE_DIR"	
+    pushd "$SOURCE_DIR"
     if [[ ! -f log4cplus-1.2.2.tar.gz ]]; then
-        wget https://github.com/log4cplus/log4cplus/releases/download/REL_1_2_2/log4cplus-1.2.2.tar.gz	    
-    fi	    
+        wget --no-check-certificate  https://github.com/log4cplus/log4cplus/releases/download/REL_1_2_2/log4cplus-1.2.2.tar.gz
+    fi
     tar zxf log4cplus-1.2.2.tar.gz
     pushd log4cplus-1.2.2
     ./scripts/fix-timestamps.sh
@@ -40,7 +40,7 @@ build_log4cplus() {
 build_boost_1_70() {
     pushd "$SOURCE_DIR"
     if [[ ! -f boost_1_70_0.tar.gz ]]; then
-        wget https://boostorg.jfrog.io/artifactory/main/release/1.70.0/source/boost_1_70_0.tar.gz
+        wget --no-check-certificate  https://boostorg.jfrog.io/artifactory/main/release/1.70.0/source/boost_1_70_0.tar.gz
     fi
     tar zxf boost_1_70_0.tar.gz
     pushd boost_1_70_0
@@ -59,7 +59,7 @@ build_boost_1_70() {
 build_protobuf_2_6() {
     pushd "$SOURCE_DIR"
     if [[ ! -f protobuf-2.6.1.tar.gz ]]; then
-        wget https://github.com/protocolbuffers/protobuf/releases/download/v2.6.1/protobuf-2.6.1.tar.gz
+        wget --no-check-certificate https://github.com/protocolbuffers/protobuf/releases/download/v2.6.1/protobuf-2.6.1.tar.gz
     fi
     tar zxf protobuf-2.6.1.tar.gz
     pushd protobuf-2.6.1
@@ -71,9 +71,9 @@ build_protobuf_2_6() {
 }
 
 build_pulsar() {
-    pushd "$SOURCE_DIR"	
+    pushd "$SOURCE_DIR"
     if [[ ! -f v2.6.3.tar.gz ]]; then
-        wget https://github.com/apache/pulsar/archive/refs/tags/v2.6.3.tar.gz	     
+        wget --no-check-certificate https://github.com/apache/pulsar/archive/refs/tags/v2.6.3.tar.gz
     fi
     tar zxf v2.6.3.tar.gz
     popd
@@ -99,6 +99,10 @@ build_pulsar() {
     popd
     popd
 }
+
+if [[ ! -d $SOURCE_DIR ]]; then
+    mkdir -p $SOURCE_DIR
+fi
 
 if [[ ! -f $INSTALL_DIR/lib/librdkafka.a ]]; then
     build_rdkafka
